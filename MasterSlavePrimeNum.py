@@ -2,13 +2,14 @@ from mpi4py import MPI
 import numpy 
 import math
 import time
+
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 size = comm.Get_size()
 status = MPI.Status()
 def master():
     for i in range(1,size):
-    start_time = time.perf_counter_ns()
+        start_time = time.perf_counter_ns()
         number = numpy.random.randint(10000)
         comm.send(obj=number,dest=i)
     for i in range(1,size):
@@ -26,8 +27,8 @@ def slave():
             if(number%i==0):
                 isPrime = str(number) +  " nao e primo" 
                 break;
-                isPrime = str(number) +  " e primo"  
             else:
+                isPrime = str(number) +  " e primo"  
 
         comm.send(obj=isPrime,dest=0)    
 if rank==0:
