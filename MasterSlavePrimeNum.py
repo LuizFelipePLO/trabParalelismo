@@ -1,46 +1,23 @@
-import random
-import sys
+import multiprocessing
 import time
-from multiprocessing import Lock, Process, Queue
-
-P = 4                       # the number of processes we want to launch
-J = 20                      # the number of jobs we want to process
-
-# slave function
 
 
-def slave(procID, jobs, dispLock):
-    try:
-        while True:
-            jobData = jobs.get_nowait()
-            dispLock.acquire()
-            sys.stdout.write('slave process %d ' % procID)
-            sys.stdout.write('working in job %d\n' % jobData['jobID'])
-            sys.stdout.flush()
-            dispLock.release()
+def primeIdentifier(array):
+    prime = []
+    for i in array:
+        c = 0
+        for j in range(1, i):
+            if i % j == 0:
+                c += 1
+        if c == 1:
+            prime.append(i)
 
-    except:
-        pass                # an exception is raised when job queue is empty
+    return prime
 
 
-# master process entry logic
 if __name__ == '__main__':
-    pool = []               # instantiate pool of processes
-    jobs = Queue()          # instantiate job queue
-    dispLock = Lock()       # instantaite display lock (see previous example)
-
-    # instantiate N slave processes
-    for procID in range(P):
-        pool.append(Process(target=slave, args=(procID, jobs, dispLock)))
-
-    # populate the job queue
-    for jobID in range(J):
-        jobs.put({'jobID': jobID})
-
-    # start the slaves
-    for slave in pool:
-        slave.start()
-
-    # wait for the slaves to finish processing
-    for slave in pool:
-        slave.join()
+    pool = multiprocessing.Pool()
+    result_async = [pool.apply_async(primeIdentifier, args=(i, )) for i in
+                    primeIdentifier(1)]
+    results = [r.get() for r in result_async]
+    print("Output: {}".format(results))
